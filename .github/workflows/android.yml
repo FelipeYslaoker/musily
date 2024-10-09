@@ -21,7 +21,9 @@ jobs:
       - name: Extract version
         id: extract_version
         run: |
-          chmod +x musily_version.sh && ./musily_version.sh >>$GITHUB_OUTPUT
+          version=$(chmod +x musily_version.sh && ./musily_version.sh)
+          echo "version=${version}"
+          echo "version=${version}" >> $GITHUB_ENV
           echo "version=${version}" >> $GITHUB_OUTPUT
 
       # Setup Java environment in order to build the Android app.
