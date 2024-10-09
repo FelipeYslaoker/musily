@@ -77,7 +77,7 @@ jobs:
         with:
           repo_name: FelipeYslaoker/musily
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: build/app/outputs/flutter-apk/app-release.apk
+          file: build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
           asset_name: Musily-arm64-v8a.apk
           tag: ${{ steps.extract_version.outputs.version }}
           prerelease: false
