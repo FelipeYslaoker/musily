@@ -115,7 +115,8 @@ jobs:
           -H "Content-Type: application/json" \
           -d '{
                 "chat_id": "${{secrets.MUSILY_CHAT_ID}}",
-                "text": "**Musily**\n${{ steps.extract_description.outputs.description }}",
+                "text": "*Musily*\n${{ steps.extract_description.outputs.description }}",
+                "parse_mode": "Markdown",
                 "reply_markup": {
                   "inline_keyboard": [[
                     {
