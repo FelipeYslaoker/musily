@@ -111,5 +111,5 @@ jobs:
       # Post on Telegram
       - name: Post on Telegram
         run: |
-          chmod +x post_to_telegram.sh
+          chmod +x post_telegram.sh
           ./post_telegram.sh "${{ secrets.TELEGRAM_BOT_TOKEN }}" "${{ secrets.TELEGRAM_CHAT_ID }}"
