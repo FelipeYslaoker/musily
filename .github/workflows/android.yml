@@ -60,11 +60,11 @@ jobs:
 
       #
       - run: |
-          echo keyPassword=\${{ secrets.KEY_STORE }} > ${{env.PROPERTIES_PATH}}
+          echo keyPassword=\${{ secrets.KEY_STORE_PASSWORD }} > ${{env.PROPERTIES_PATH}}
           echo storePassword=\${{ secrets.KEY_PASSWORD }} >> ${{env.PROPERTIES_PATH}}
           echo keyAlias=\${{ secrets.KEY_ALIAS }} >> ${{env.PROPERTIES_PATH}}
       #
-      - run: echo "${{ secrets.KEY_STORE_64 }}" | base64 --decode > android/app/key.jks
+      - run: echo "${{ secrets.KEY_STORE_BASE64 }}" | base64 --decode > android/app/key.jks
 
       # Get Flutter dependencies.
       - name: Get Flutter dependencies
@@ -112,4 +112,4 @@ jobs:
       - name: Post on Telegram
         run: |
           chmod +x post_to_telegram.sh
-          ./post_to_telegram.sh "${{ secrets.MUSILY_BOT_TOKEN }}" "${{ secrets.MUSILY_CHAT_ID }}"
+          ./post_telegram.sh "${{ secrets.TELEGRAM_BOT_TOKEN }}" "${{ secrets.TELEGRAM_CHAT_ID }}"
