@@ -111,18 +111,5 @@ jobs:
       # Post on Telegram
       - name: Post on Telegram
         run: |
-          curl -X POST "https://api.telegram.org/bot${{ secrets.MUSILY_BOT_TOKEN }}/sendMessage" \
-          -H "Content-Type: application/json" \
-          -d '{
-                "chat_id": "${{secrets.MUSILY_CHAT_ID}}",
-                "text": "*Musily*\n${{ steps.extract_description.outputs.description }}",
-                "parse_mode": "Markdown",
-                "reply_markup": {
-                  "inline_keyboard": [[
-                    {
-                      "text": "Download",
-                      "url": "https://github.com/FelipeYslaoker/musily/releases/download/${{ steps.extract_version.outputs.version }}/musily-${{steps.extract_version.outputs.version}}.apk"
-                    }
-                  ]]
-                }
-              }'
+          chmod +x post_to_telegram.sh
+          ./post_to_telegram.sh "${{ secrets.MUSILY_BOT_TOKEN }}" "${{ secrets.MUSILY_CHAT_ID }}"
