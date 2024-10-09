@@ -22,9 +22,16 @@ jobs:
         id: extract_version
         run: |
           version=$(chmod +x musily_version.sh && ./musily_version.sh)
-          echo "version=${version}"
           echo "version=${version}" >> $GITHUB_ENV
           echo "version=${version}" >> $GITHUB_OUTPUT
+
+      # Extract description from script
+      - name: Extract description
+        id: extract_description
+        run: |
+          description=$(chmod +x musily_description.sh && ./musily_description.sh)
+          echo "description=${description}" >> $GITHUB_ENV
+          echo "description=${description}" >> $GITHUB_OUTPUT
 
       # Setup Java environment in order to build the Android app.
       - name: Set up Java
@@ -80,6 +87,7 @@ jobs:
           file: build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
           asset_name: Musily-arm64-v8a.apk
           tag: ${{ steps.extract_version.outputs.version }}
+          body: "${{ steps.extract_description.outputs.description }}"
           prerelease: false
           overwrite: true
 
@@ -94,7 +102,26 @@ jobs:
           repo_name: FelipeYslaoker/musily
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: build/app/outputs/flutter-apk/app-release.apk
-          asset_name: Musily.apk
+          asset_name: musily-${{steps.extract_version.outputs.version}}.apk
           tag: ${{ steps.extract_version.outputs.version }}
+          body: "${{ steps.extract_description.outputs.description }}"
           prerelease: false
           overwrite: true
+
+      # Post on Telegram
+      - name: Post on Telegram
+        run: |
+          curl -X POST "https://api.telegram.org/bot${{ secrets.MUSILY_BOT_TOKEN }}/sendMessage" \
+          -H "Content-Type: application/json" \
+          -d '{
+                "chat_id": "${{secrets.MUSILY_CHAT_ID}}",
+                "text": "**Musily**\n${{ steps.extract_description.outputs.description }}",
+                "reply_markup": {
+                  "inline_keyboard": [[
+                    {
+                      "text": "Download",
+                      "url": "https://github.com/FelipeYslaoker/musily/releases/download/${{ steps.extract_version.outputs.version }}/musily-${{steps.extract_version.outputs.version}}.apk"
+                    }
+                  ]]
+                }
+              }'
