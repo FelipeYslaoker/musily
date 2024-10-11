@@ -17,21 +17,22 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Extract version from commit message
+      # Extract version from pubspec
       - name: Extract version
         id: extract_version
         run: |
-          version=$(chmod +x musily_version.sh && ./musily_version.sh)
+          version=$(chmod +x musily_metadata.sh && ./musily_metadata.sh --version)
           echo "version=${version}" >> $GITHUB_ENV
           echo "version=${version}" >> $GITHUB_OUTPUT
 
-      # Extract description from script
+      # Extract description from CHANGELOG.md
       - name: Extract description
         id: extract_description
         run: |
-          description=$(chmod +x musily_description.sh && ./musily_description.sh)
-          echo "description=${description}" >> $GITHUB_ENV
-          echo "description=${description}" >> $GITHUB_OUTPUT
+          description=$(chmod +x musily_metadata.sh && ./musily_metadata.sh --description)
+          escaped_description=$(echo "$description" | sed 's/%/%25/g; s/\r/%0D/g; s/\n/%0A/g; s/\*/\\*/g; s/_/\\_/g')
+          echo "description=${escaped_description}" >> $GITHUB_ENV
+          echo "description=${escaped_description}" >> $GITHUB_OUTPUT
 
       # Setup Java environment in order to build the Android app.
       - name: Set up Java
@@ -58,13 +59,14 @@ jobs:
           channel: "stable"
           flutter-version: 3.22.3
 
-      #
-      - run: |
-          echo keyPassword=\${{ secrets.KEY_STORE_PASSWORD }} > ${{env.PROPERTIES_PATH}}
-          echo storePassword=\${{ secrets.KEY_PASSWORD }} >> ${{env.PROPERTIES_PATH}}
-          echo keyAlias=\${{ secrets.KEY_ALIAS }} >> ${{env.PROPERTIES_PATH}}
-      #
-      - run: echo "${{ secrets.KEY_STORE_BASE64 }}" | base64 --decode > android/app/key.jks
+      # Create key.properties file
+      - name: Create key.properties
+        run: |
+          echo ${{ secrets.KEY_PROPERTIES_BASE64 }} | base64 --decode > ${{env.PROPERTIES_PATH}}
+
+      # Create key.jks file
+      - name: Create key.jks
+        run: echo ${{ secrets.KEY_STORE_BASE64 }} | base64 --decode > android/app/key.jks
 
       # Get Flutter dependencies.
       - name: Get Flutter dependencies
@@ -82,7 +84,7 @@ jobs:
       - name: Release arm64 APK
         uses: svenstaro/upload-release-action@v2
         with:
-          repo_name: FelipeYslaoker/musily
+          repo_name: MusilyApp/musily
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
           asset_name: Musily-arm64-v8a.apk
@@ -99,7 +101,7 @@ jobs:
       - name: Release universal APK
         uses: svenstaro/upload-release-action@v2
         with:
-          repo_name: FelipeYslaoker/musily
+          repo_name: MusilyApp/musily
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: build/app/outputs/flutter-apk/app-release.apk
           asset_name: musily-${{steps.extract_version.outputs.version}}.apk
