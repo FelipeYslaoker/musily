@@ -1,9 +1,10 @@
 on:
-  push:
-    branches:
-      - test
-      
-        
+  workflow_dispatch:
+    inputs:
+      branch_name:
+        description: test
+        required: true
+
 name: Really Test
 
 env:
@@ -18,8 +19,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          ref: ${{ inputs.branch_name }}
 
       - name: Extract Version
         id: extract_version
