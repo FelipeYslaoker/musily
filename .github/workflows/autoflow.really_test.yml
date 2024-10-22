@@ -1,9 +1,8 @@
 on:
-  workflow_dispatch:
-    inputs:
-      branch_name:
-        description: 'test'
-        required: true
+  push:
+    branches:
+      - test
+      
         
 name: Really Test
 
