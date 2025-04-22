@@ -137,6 +137,13 @@ jobs:
         with:
           path: dist
 
+      - name: Rename APK file
+        run: |
+          apk_path=$(find dist -name "*.apk" | head -n 1)
+          new_apk_name="musily-${{ needs.metadata.outputs.version }}.apk"
+          mv "$apk_path" "dist/$new_apk_name"
+        shell: bash
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
@@ -147,4 +154,4 @@ jobs:
           files: |
             dist/**/*.zip
             dist/**/*.tar.gz
-            dist/**/*.apk
+            dist/musily-${{ needs.metadata.outputs.version }}.apk
