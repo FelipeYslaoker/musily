@@ -23,13 +23,13 @@ jobs:
       - name: Extract version
         id: extract_version
         run: |
-          version=$(dart run tool/musily_metadata.dart --version)
+          version=$(chmod +x musily_metadata.sh && ./musily_metadata.sh --version)
           echo "version=${version}" >> $GITHUB_OUTPUT
 
       - name: Extract description
         id: extract_description
         run: |
-          description=$(dart run tool/musily_metadata.dart --description)
+          description=$(chmod +x musily_metadata.sh && ./musily_metadata.sh --description)
           escaped_description="${description//'%'/'%25'}"
           escaped_description="${escaped_description//$'\n'/'%0A'}"
           escaped_description="${escaped_description//$'\r'/'%0D'}"
