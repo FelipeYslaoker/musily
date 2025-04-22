@@ -65,7 +65,10 @@ jobs:
 
       - name: Build APK (Android)
         if: matrix.os == 'ubuntu-latest'
-        run: flutter build apk --release --flavor stable
+        run: |
+          echo "${{ secrets.KEY_PROPERTIES_BASE64 }}" | base64 --decode > android/key.properties
+          echo "${{ secrets.KEY_STORE_BASE64 }}" | base64 --decode > android/app/key.jks
+          flutter build apk --release --flavor stable
 
       - name: Build Linux
         if: matrix.os == 'ubuntu-latest'
