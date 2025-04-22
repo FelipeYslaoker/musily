@@ -100,7 +100,7 @@ jobs:
       - name: Archive Windows build
         if: matrix.os == 'windows-latest'
         run: |
-          powershell Compress-Archive -Path build/windows/runner/Release/* -DestinationPath build/musily-windows-x64.zip
+          powershell -Command "Compress-Archive -Path 'build/windows/runner/Release' -DestinationPath 'build/musily-windows-x64.zip' -Recurse"
 
       - name: Build macOS
         if: matrix.os == 'macos-latest'
