@@ -15,12 +15,15 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-
     runs-on: ${{ matrix.os }}
 
     env:
       BUILD_DIR_LINUX: build/linux/x64/release/bundle
       ARCHIVE_NAME_LINUX: musily-linux-x64.tar.gz
+
+    outputs:
+      version: ${{ steps.extract_metadata.outputs.version }}
+      description: ${{ steps.extract_metadata.outputs.description }}
 
     steps:
       - name: Checkout code
@@ -46,22 +49,16 @@ jobs:
             libstdc++-12-dev libmpv-dev \
             libjsoncpp-dev libsecret-1-dev
 
-      - name: Extract version
-        id: extract_version
+      - name: Extract metadata (version and description)
+        id: extract_metadata
         run: |
-          version=$(chmod +x musily_metadata.sh && ./musily_metadata.sh --version)
-          echo "version=${version}" >> $GITHUB_ENV
-          echo "version=${version}" >> $GITHUB_OUTPUT
-
-      - name: Extract description
-        id: extract_description
-        run: |
-          description=$(chmod +x musily_metadata.sh && ./musily_metadata.sh --description)
+          version=$(dart musily_metadata.dart --version)
+          description=$(dart musily_metadata.dart --description)
           escaped_description="${description//'%'/'%25'}"
           escaped_description="${escaped_description//$'\n'/'%0A'}"
           escaped_description="${escaped_description//$'\r'/'%0D'}"
-          echo "description=${escaped_description}" >> $GITHUB_ENV
-          echo "description=${escaped_description}" >> $GITHUB_OUTPUT
+          echo "version=$version" >> $GITHUB_OUTPUT
+          echo "description=$escaped_description" >> $GITHUB_OUTPUT
 
       - name: Build APK (Android)
         if: matrix.os == 'ubuntu-latest'
@@ -96,6 +93,7 @@ jobs:
   release:
     needs: build
     runs-on: ubuntu-latest
+
     steps:
       - name: Download all artifacts
         uses: actions/download-artifact@v4
@@ -111,4 +109,3 @@ jobs:
           body: "${{ needs.build.outputs.description }}"
           files: |
             dist/**/*
-
