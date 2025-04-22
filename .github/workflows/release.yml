@@ -106,7 +106,7 @@ jobs:
       - name: Archive Windows build using Python
         if: matrix.os == 'windows-latest'
         run: |
-          python -c "import shutil; shutil.make_archive('build/musily-windows-x64', 'zip', 'build/windows/runner/Release')"
+          python -c "import shutil; shutil.make_archive('build/musily-windows-x64', 'zip', 'build/windows/x64/runner/Release')"
 
 
       - name: Build macOS
