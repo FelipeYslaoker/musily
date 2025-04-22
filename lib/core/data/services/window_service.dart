@@ -31,6 +31,9 @@ class WindowService {
   }
 
   static Future<void> setPreventClose(ClosePreference preference) async {
+    if (Platform.isAndroid || Platform.isIOS) {
+      return;
+    }
     if (preference == ClosePreference.close) {
       await windowManager.setPreventClose(false);
     } else {

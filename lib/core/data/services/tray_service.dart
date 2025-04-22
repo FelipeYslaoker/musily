@@ -32,8 +32,13 @@ class TrayService {
     await trayManager.setContextMenu(menu);
   }
 
-  static Future<void> initContextMenu(BuildContext context,
-      {Locale? locale}) async {
+  static Future<void> initContextMenu(
+    BuildContext context, {
+    Locale? locale,
+  }) async {
+    if (Platform.isAndroid || Platform.isIOS) {
+      return;
+    }
     late final AppLocalizations localization;
     if (locale != null) {
       localization = await AppLocalizations.delegate.load(locale);
