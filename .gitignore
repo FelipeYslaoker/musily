@@ -30,6 +30,7 @@ pubspec.lock
 **/android/local.properties
 **/android/**/GeneratedPluginRegistrant.java
 android/app/.cxx
+android/.kotlin
 
 # iOS/XCode related
 **/ios/**/*.mode1v3
