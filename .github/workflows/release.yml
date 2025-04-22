@@ -23,13 +23,13 @@ jobs:
       - name: Extract version
         id: extract_version
         run: |
-          version=$(chmod +x musily_metadata.sh && ./musily_metadata.sh --version)
+          version=$(dart run tool/musily_metadata.dart --version)
           echo "version=${version}" >> $GITHUB_OUTPUT
 
       - name: Extract description
         id: extract_description
         run: |
-          description=$(chmod +x musily_metadata.sh && ./musily_metadata.sh --description)
+          description=$(dart run tool/musily_metadata.dart --description)
           escaped_description="${description//'%'/'%25'}"
           escaped_description="${escaped_description//$'\n'/'%0A'}"
           escaped_description="${escaped_description//$'\r'/'%0D'}"
@@ -44,7 +44,6 @@ jobs:
 
     env:
       BUILD_DIR_LINUX: build/linux/x64/release/bundle
-      ARCHIVE_NAME_LINUX: musily-linux-x64.tar.gz
 
     steps:
       - name: Checkout code
@@ -57,6 +56,7 @@ jobs:
           flutter-version: "3.29.3"
 
       - name: Set up Java
+        if: matrix.os == 'ubuntu-latest'
         uses: actions/setup-java@v4
         with:
           distribution: "zulu"
@@ -86,25 +86,38 @@ jobs:
 
       - name: Build Linux
         if: matrix.os == 'ubuntu-latest'
+        run: flutter build linux --release
+
+      - name: Archive Linux build
+        if: matrix.os == 'ubuntu-latest'
         run: |
-          flutter build linux --release
-          tar -czvf ${{ env.ARCHIVE_NAME_LINUX }} -C ${{ env.BUILD_DIR_LINUX }} .
+          tar -czvf build/musily-linux-x64.tar.gz -C $BUILD_DIR_LINUX .
 
       - name: Build Windows
         if: matrix.os == 'windows-latest'
         run: flutter build windows --release
 
+      - name: Archive Windows build
+        if: matrix.os == 'windows-latest'
+        run: |
+          powershell Compress-Archive -Path build/windows/runner/Release/* -DestinationPath build/musily-windows-x64.zip
+
       - name: Build macOS
         if: matrix.os == 'macos-latest'
         run: flutter build macos --release
+
+      - name: Archive macOS build
+        if: matrix.os == 'macos-latest'
+        run: |
+          ditto -c -k --sequesterRsrc --keepParent build/macos/Build/Products/Release/musily.app build/musily-macos-x64.zip
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: Flutter-Build-${{ matrix.os }}
           path: |
-            build/**/release/**/*
-            *.tar.gz
+            build/*.zip
+            build/*.tar.gz
             build/app/outputs/flutter-apk/*.apk
 
   release:
@@ -125,4 +138,6 @@ jobs:
           name: Release ${{ needs.metadata.outputs.version }}
           body: "${{ needs.metadata.outputs.description }}"
           files: |
-            dist/**/*
+            dist/**/*.zip
+            dist/**/*.tar.gz
+            dist/**/*.apk
