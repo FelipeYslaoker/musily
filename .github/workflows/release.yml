@@ -11,7 +11,32 @@ permissions:
   contents: write
 
 jobs:
+  metadata:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.extract_version.outputs.version }}
+      description: ${{ steps.extract_description.outputs.description }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Extract version
+        id: extract_version
+        run: |
+          version=$(chmod +x musily_metadata.sh && ./musily_metadata.sh --version)
+          echo "version=${version}" >> $GITHUB_OUTPUT
+
+      - name: Extract description
+        id: extract_description
+        run: |
+          description=$(chmod +x musily_metadata.sh && ./musily_metadata.sh --description)
+          escaped_description="${description//'%'/'%25'}"
+          escaped_description="${escaped_description//$'\n'/'%0A'}"
+          escaped_description="${escaped_description//$'\r'/'%0D'}"
+          echo "description=${escaped_description}" >> $GITHUB_OUTPUT
+
   build:
+    needs: metadata
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
@@ -20,10 +45,6 @@ jobs:
     env:
       BUILD_DIR_LINUX: build/linux/x64/release/bundle
       ARCHIVE_NAME_LINUX: musily-linux-x64.tar.gz
-
-    outputs:
-      version: ${{ steps.extract_metadata.outputs.version }}
-      description: ${{ steps.extract_metadata.outputs.description }}
 
     steps:
       - name: Checkout code
@@ -48,17 +69,6 @@ jobs:
             libgtk-3-dev liblzma-dev libglu1-mesa \
             libstdc++-12-dev libmpv-dev \
             libjsoncpp-dev libsecret-1-dev
-
-      - name: Extract metadata (version and description)
-        id: extract_metadata
-        run: |
-          version=$(dart musily_metadata.dart --version)
-          description=$(dart musily_metadata.dart --description)
-          escaped_description="${description//'%'/'%25'}"
-          escaped_description="${escaped_description//$'\n'/'%0A'}"
-          escaped_description="${escaped_description//$'\r'/'%0D'}"
-          echo "version=$version" >> $GITHUB_OUTPUT
-          echo "description=$escaped_description" >> $GITHUB_OUTPUT
 
       - name: Build APK (Android)
         if: matrix.os == 'ubuntu-latest'
@@ -91,7 +101,7 @@ jobs:
             build/app/outputs/flutter-apk/*.apk
 
   release:
-    needs: build
+    needs: [metadata, build]
     runs-on: ubuntu-latest
 
     steps:
@@ -104,8 +114,8 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           draft: false
-          tag_name: ${{ needs.build.outputs.version }}
-          name: Release ${{ needs.build.outputs.version }}
-          body: "${{ needs.build.outputs.description }}"
+          tag_name: ${{ needs.metadata.outputs.version }}
+          name: Release ${{ needs.metadata.outputs.version }}
+          body: "${{ needs.metadata.outputs.description }}"
           files: |
             dist/**/*
