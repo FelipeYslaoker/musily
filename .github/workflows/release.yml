@@ -97,10 +97,17 @@ jobs:
         if: matrix.os == 'windows-latest'
         run: flutter build windows --release
 
-      - name: Archive Windows build
+      - name: Set up Python
+        if: matrix.os == 'windows-latest'
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      
+      - name: Archive Windows build using Python
         if: matrix.os == 'windows-latest'
         run: |
-          powershell -Command "Compress-Archive -Path 'build/windows/runner/Release' -DestinationPath 'build/musily-windows-x64.zip' -Recurse"
+          python -c "import shutil; shutil.make_archive('build/musily-windows-x64', 'zip', 'build/windows/runner/Release')"
+
 
       - name: Build macOS
         if: matrix.os == 'macos-latest'
