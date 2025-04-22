@@ -66,6 +66,11 @@ class CoreModule extends Module {
           module: DownloaderModule(),
           transition: TransitionType.noTransition,
         ),
+        ModuleRoute(
+          '/blank/',
+          module: DownloaderModule(),
+          transition: TransitionType.noTransition,
+        ),
       ],
     );
   }
