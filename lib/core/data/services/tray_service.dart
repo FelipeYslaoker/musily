@@ -28,7 +28,9 @@ class TrayService {
       ],
     );
     await trayManager.setIcon(icon);
-    await trayManager.setTitle('Musily');
+    if (!Platform.isWindows) {
+      await trayManager.setTitle('Musily');
+    }
     await trayManager.setContextMenu(menu);
   }
 
