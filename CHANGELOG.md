@@ -1,3 +1,16 @@
+## 4.0.0
+
+**Features**
+
+- Introduced timed lyrics support, allowing lyrics to synchronize with playback.
+- Implemented accent color detection: system accent on desktop and wallpaper accent on Android.
+- Added desktop support, enabling downloads and usage on Linux and Windows.
+
+**Fixes**
+
+- Fixed an issue where the app would close after importing a playlist from YouTube.
+- Resolved an issue where the app would freeze after restoring a library backup.
+
 ## 3.1.1
 
 **Improvements**
